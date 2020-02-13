@@ -1,87 +1,48 @@
 name: mycroft-core
-version: 0.7.13
+version: 19.8.7
 summary:  79 char long summary
 description:  a longer description for the snap
+base: core18
 confinement: devmode # use "strict" to enforce system access only via declared interfaces
-build-packages: [python-dev, python-virtualenv, python-setuptools, python-gobject-dev, virtualenvwrapper, libtool, libffi-dev, libssl-dev, autoconf, bison, swig2.0, libglib2.0-dev, portaudio19-dev, mpg123, python-psutil, speech-dispatcher]
+build-packages: [python3-dev, python3-setuptools, libtool, libffi-dev, libssl-dev, autoconf, bison, libglib2.0-dev, portaudio19-dev, mpg123, python-psutil, speech-dispatcher, swig, libfann-dev]
 parts:
-  mimic:
-    plugin: autotools
-    configflags:
-      - --enable-static=no
-      - --prefix=/usr/local/
-      - --with-audio=pulseaudio
-    source: https://github.com/MycroftAI/mimic.git
-    source-type: git
-    build-packages:
-      - libpulse-dev
-      - libltdl-dev
-      - gcc
-      - make
-      - pkg-config
-      - libasound2-dev
-    stage-packages: [libpulse0]
-    snap:
-      - usr/local/bin
-      - usr/local/include
-      - usr/local/lib
-
   mycroft-core:
-    plugin: python2
-    requirements: parts/mycroft-core/src/requirements.txt
+    plugin: python
+    python-version: python3
     source: https://github.com/MycroftAI/mycroft-core.git
     source-type: git
-    source-branch: feature/snapcraft
+    source-branch: master
     build-packages: [python-psutil, python-setuptools]
-    stage-packages: [speech-dispatcher]
-#    snap:
-#      - etc
-#      - usr
-#      - lib
-#      - usr/lib/python2.7
-#      - usr/lib/python2.7/dist-packages/*
-#      - usr/lib/x86_64-linux-gnu
-#      - usr/bin/python
-#      - usr/bin/pip
-#      - usr/bin/python2.7-config
-#      - usr/bin/python-config
-#      - usr/bin/python2.7
-#      - usr/bin/2to3-2.7
-#      - usr/bin/pyversions
-#      - usr/bin/pygettext2.7
-#      - usr/bin/pycompile
-#      - usr/bin/mtrace
-#      - usr/bin/python2-config
-#      - usr/bin/python2
-#      - usr/bin/sotruss
-#      - usr/bin/x86_64-linux-gnu-python2.7-config
-#      - usr/bin/x86_64-linux-gnu-python-config
-#      - usr/bin/pygettext
-#      - usr/bin/gencat
-#      - usr/bin/cautious-launcher
-#      - usr/share/python/dist_fallback
-#      - usr/share/python/pyversions.py
-#      - lib/x86_64-linux-gnu
-#      - usr/bin/mycroft-messagebus
-#      - usr/bin/mycroft-skills
-#      - usr/bin/mycroft-speech-client
-#      - usr/bin/mycroft-cli-client
+    stage-packages: [speech-dispatcher, libfann2, libjack0, libportaudio2, libsndio6.1, git]
 
 apps:
-  mimic:
-    command: usr/local/bin/mimic
-    plugs: [pulseaudio]
   messagebus:
     plugs: [home, network, network-bind]
-    command: usr/bin/mycroft-messagebus
+    environment:
+      LANGUAGE: "C.UTF-8"
+      LANG: "C.UTF-8"
+      LC_ALL: "C.UTF-8"
+    command: python3 -m mycroft.messagebus.service
     daemon: simple
   skills-client:
     plugs: [home]
-    command: usr/bin/mycroft-skills
+    environment:
+      LANGUAGE: "C.UTF-8"
+      LANG: "C.UTF-8"
+      LC_ALL: "C.UTF-8"
+    command: python3 -m mycroft.messagbus.skills
     daemon: simple
   speech-client:
     plugs: [home, network, pulseaudio]
-    command: usr/bin/mycroft-speech-client
+    environment:
+      LANGUAGE: "C.UTF-8"
+      LANG: "C.UTF-8"
+      LC_ALL: "C.UTF-8"
+    command: python3 -m mycroft.client.speech
     daemon: simple
   cli-client:
-    command: usr/bin/mycroft-cli-client
+    environment:
+      LANGUAGE: "C.UTF-8"
+      LANG: "C.UTF-8"
+      LC_ALL: "C.UTF-8"
+    command: python3 -m mycroft.client.text
